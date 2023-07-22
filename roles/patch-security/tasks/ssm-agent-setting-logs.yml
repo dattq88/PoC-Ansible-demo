@@ -1,0 +1,48 @@
+- name: SSM AGENT SETTING LOGS > Create folder to contain config file
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  loop:
+    - "/etc/amazon"
+    - "/etc/amazon/ssm"
+  become_user: root
+
+- name: SSM AGENT SETTING LOGS > Copy template config file
+  copy:
+    src: "/snap/amazon-ssm-agent/current/seelog.xml.template"
+    dest: "/etc/amazon/ssm/seelog.xml"
+    remote_src: yes
+  become_user: root
+
+- name: SSM AGENT SETTING LOGS > Remove console line of seelog to disable stream log to syslog
+  become_user: root
+  lineinfile:
+    dest: "/etc/amazon/ssm/seelog.xml"
+    regexp: '<console formatid="fmtinfo"/>'
+    state: absent
+    backup: yes
+
+- name: SSM AGENT SETTING LOGS > Modify permission AWS SSM LOGS
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: adm
+  loop:
+    - { path: '/var/log/amazon', state: 'directory', mode: '0755' }
+    - { path: '/var/log/amazon/ssm', state: 'directory', mode: '0755' }
+    - { path: '{{ ssm_agent_log_path }}', state: 'file', mode: '0664' }
+    - { path: '{{ ssm_error_log_path }}', state: 'touch', mode: '0664' }
+  become_user: root
+  become: yes
+
+- name: SSM AGENT SETTING LOGS > Restart amazon-ssm-agent service
+  shell: snap restart amazon-ssm-agent
+  become: yes
+  become_user: root
+  register: restart_ssm_agent
+- debug: var=restart_ssm_agent.stdout_lines

@@ -1,0 +1,44 @@
+- name: PHP > Add PHP Repositoy
+  become: yes
+  apt_repository:
+      repo: "{{ php_repo_ubuntu }}"
+      state: present
+
+- name: PHP > Install PHP
+  become: yes
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ php_packges_ubuntu }}"
+
+- name: PHP > Stop service apache2
+  become: yes
+  systemd:
+    name: apache2
+    state: stopped
+
+- name: PHP > Disable service apache2
+  become: yes
+  systemd:
+    name: apache2
+    enabled: no
+
+- name: PHP > Create folder php-fpm log
+  become: yes
+  file: #Need to add '0664' mode and change owner & group to deploy user 
+    path: /var/log/{{ php_version }}
+    state: directory
+
+- name: PHP > Add PHP-FPM POOL CONFIGURATION
+  become: yes
+  template:
+    src:  service.conf.j2
+    dest: "{{ php_pool }}/service.conf"
+  notify: php_installed
+
+- name: PHP > Remove file fpm pool default
+  become: yes
+  file:
+    path: "{{ php_pool }}/www.conf"
+    state: absent
+  notify: php_installed

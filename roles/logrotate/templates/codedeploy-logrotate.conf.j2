@@ -1,0 +1,21 @@
+/var/log/aws/codedeploy-agent/codedeploy-agent*.log
+{
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    sharedscripts
+}
+
+{{ codedeploy_deployment_log_path }}
+{
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    sharedscripts
+}

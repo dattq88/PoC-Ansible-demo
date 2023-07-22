@@ -1,0 +1,10 @@
+[tag_Role_bastion]
+
+[tag_Role_admin]
+
+[tag_Role_wp_platform_front]
+ansible-wp-platform-nginx ansible_host=52.194.163.66 ansible_ssh_private_key_file=roles/distribute-key/templates/wp-platform-keypair-prod.pem
+
+[tag_Env_prod:children]
+tag_Role_bastion
+tag_Role_admin

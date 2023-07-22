@@ -1,0 +1,22 @@
+# Install awscli
+- name: AWS-CLI > Install awscli via apt
+  apt:
+    name: awscli
+    state: present
+  become: yes
+- name: AWS-CLI > Install awscli via pip2
+  pip:
+    executable: pip2
+    name: awscli
+  become_user: "{{ deploy_user }}"
+  become: yes
+- name: AWS-CLI > Upgrade awscli via pip
+  command: pip install --upgrade awscli
+  become: yes
+- name: AWS-CLI > Check version awscli
+  command: aws --version
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+  register: awscli_ver
+- debug: var=awscli_ver.stderr

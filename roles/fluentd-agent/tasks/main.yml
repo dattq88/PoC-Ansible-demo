@@ -1,0 +1,106 @@
+# Install Fluentd for Ubuntu
+- name: FLUENTD AGENT > Download script install Fluentd
+  get_url:
+    url: "https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent4.sh"
+    dest: "/home/{{ deploy_user }}/install-ubuntu-bionic-td-agent4.sh"
+    mode: 0755
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: FLUENTD AGENT > Install Fluentd
+  shell: bash -lc "/home/{{ deploy_user }}/install-ubuntu-bionic-td-agent4.sh"
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: FLUENTD AGENT > Add user td-agent to group adm
+  user:
+    name: td-agent
+    shell: /bin/bash
+    groups: "{{ item.groups }}"
+    append: yes
+  when: "{{ item.when }}"
+  loop:
+    - { groups: 'adm, {{ deploy_user }}', when: project is not search("wp*") }
+    - { groups: 'adm, {{ deploy_user }}, root', when: project is search("wp*") }
+  notify:
+    - restart fluentd
+  become: yes
+  tags: [ wp_platform_fluentd_agent_140121 ]
+
+- name: FLUENTD AGENT > Modify permission Any folders/files
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop: "{{ fluentd_agent_modify_permission_loop }}"
+  become_user: root
+  become: yes
+  when: fluentd_agent_modify_permission_loop is defined
+  tags: [ wp_platform_fluentd_agent_150121 ]
+
+- name: FLUENTD AGENT > Install Plugin Fluentd > S3
+  gem:
+    name: "{{ item }}"
+    executable: /opt/td-agent/bin/fluent-gem
+    state: present
+    user_install: no
+  loop:
+    - fluent-plugin-s3
+    - fluent-plugin-ec2-metadata
+    - fluent-plugin-forest
+  notify:
+    - restart fluentd
+  become: yes
+
+- name: FLUENTD AGENT > Create td-agent/conf.d directory
+  file:
+    path: /etc/td-agent/conf.d
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  become: yes
+
+- name: FLUENTD AGENT > Configuration td-agent.conf
+  template:
+    src: td-agent.conf.j2
+    dest: /etc/td-agent/td-agent.conf
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart fluentd
+  become: yes
+
+- name: FLUENTD AGENT > Configuration EC2-Logs > S3
+  template:
+    src: "{{ item }}"
+    dest: /etc/td-agent/conf.d/{{ item | regex_replace('.j2') }}
+    mode: 0644
+    owner: root
+    group: root
+  loop: "{{ fluentd_agent_conf }}"
+  notify:
+    - restart fluentd
+  become: yes
+
+- name: FLUENTD AGENT > Configuration td-agent.service
+  template:
+    src: td-agent.service.j2
+    dest: /lib/systemd/system/td-agent.service
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload systemctl
+    - restart fluentd
+  become: yes
+
+- name:  FLUENTD AGENT > Fluentd Status
+  shell: bash -lc "systemctl status td-agent"
+  register: status_fluentd
+- debug: var=status_fluentd.stdout_lines

@@ -1,0 +1,52 @@
+project: vpbplatform
+region: ap-northeast-1
+
+# User deploy
+deploy_user: deploy
+
+# Roles/base
+base_timezone: Asia/Ho_Chi_Minh
+base_maxopenfile: 65535
+
+# Roles/nginx
+nginx_log_dir: "/var/log/nginx"
+
+# Roles/*-with-rvm
+rvm_rvm: '{{ rvm_install_path }}/bin/rvm'
+rvm_install_path: '~/.rvm'
+
+app_path: /usr/local/rails_app/
+app_path_project: "{{ app_path }}{{ project }}"
+
+# Roles/bundle-install
+git_app_folder: "DeliverySystem"
+
+# Roles/yarn-install
+git_cons_folder: "FE_vpb-platform_Consumer"
+
+# Role/cloudwatch-logs
+# Role/fluentd-agent
+sys_log_path: /var/log/syslog
+auth_log_path: /var/log/auth.log
+nginx_access_log_path: "{{ nginx_log_dir }}/access.log"
+nginx_error_log_path: "{{ nginx_log_dir }}/error.log"
+app_nginx_access_log_path: "{{ nginx_log_dir }}/{{ server_name }}.access.log"
+app_nginx_error_log_path: "{{ nginx_log_dir }}/{{ server_name }}.error.log"
+app_log_path: "{{ app_path_project }}/shared/log/{{ full_env }}.log"
+paygent_log_path: "{{ app_path_project }}/shared/log/paygent.log"
+worker_log_path: "{{ app_path_project }}/shared/log/shoryuken-{{ full_env }}.log"
+cron_log_path: "{{ app_path_project }}/shared/log/cron_log.log"
+codedeploy_agent_log_path: /var/log/aws/codedeploy-agent/codedeploy-agent.log
+codedeploy_update_log_path: /tmp/codedeploy-agent.update.log
+codedeploy_deployment_log_path: /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
+pm2_log_path: "/home/{{ deploy_user }}/.pm2/pm2.log"
+pm2_vpbplatform_out_log_path: "/home/{{ deploy_user }}/.pm2/logs/vpbplatform-out.log"
+pm2_vpbplatform_error_log_path: "/home/{{ deploy_user }}/.pm2/logs/vpbplatform-error.log"
+ssm_agent_log_path: /var/log/amazon/ssm/amazon-ssm-agent.log
+ssm_error_log_path: /var/log/amazon/ssm/errors.log
+
+wp_mysql_error_log_path: /var/log/mysql/error.log
+wp_php_access_log_path: /var/log/7.4/www.access.log
+wp_php_fpm_log_path: /var/log/php7.4-fpm.log
+# Role/newrelic-nginx
+newrelic_license_key: "{{ lookup('aws_ssm', '/' + env + '/NEWRELIC_LICENSE_KEY', decrypt=true, region=region) }}"

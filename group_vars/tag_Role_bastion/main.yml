@@ -1,0 +1,27 @@
+type: bastion
+
+# Role/cloudwatch logs
+log_group_type:
+    sys_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ sys_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    auth_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ auth_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    ssm_agent_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ ssm_agent_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    ssm_error_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ ssm_error_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+
+# Role/fluentd-agent
+fluentd_agent_conf:
+  - auth.conf.j2
+  - syslog.conf.j2
+  - ssm-agent.conf.j2
+  - ssm-error.conf.j2
+
+# Role/logrotate
+logrotate_conf:
+  - ssm-logrotate.conf.j2

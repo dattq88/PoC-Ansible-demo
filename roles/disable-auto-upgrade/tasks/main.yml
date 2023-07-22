@@ -1,0 +1,25 @@
+#Disable Unattended Upgrades(Automatically update/upgrade)
+- name: Disable Unattended Upgrades > Check unattended-upgrades service
+  shell: dpkg-query -f '${binary:Package}\n' -W | grep unattended-upgrades 
+  register: service_exists
+- debug: var=service_exists.stdout
+
+- name: Disable Unattended Upgrades > Replace auto-upgrades file by auto-upgrades-disabled file
+  copy:
+    src: "/usr/share/unattended-upgrades/20auto-upgrades-disabled"
+    dest: "/etc/apt/apt.conf.d/20auto-upgrades"
+    remote_src: yes
+  become: yes
+  when: service_exists.stdout=="unattended-upgrades"
+
+- name: Disable Unattended Upgrades > Check have update/upgrade config in another file
+  stat:
+    path: /etc/apt/apt.conf.d/10periodic
+  register: file_info
+- name: Disable Unattended Upgrades > Disable the remaining tasks of Unattended Upgrades service
+  replace:
+    path: /etc/apt/apt.conf.d/10periodic
+    regexp: '1'
+    replace: '0'
+  become: yes
+  when: service_exists.stdout=="unattended-upgrades" and file_info.stat.exists

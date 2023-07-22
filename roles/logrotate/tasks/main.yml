@@ -1,0 +1,14 @@
+# Setup logrotate
+- name: LOGROTATE > Create config file
+  template:
+    src: "{{ item }}"
+    dest: /etc/logrotate.d/{{ item | regex_replace('.j2') }}
+    mode: 0644
+    group: root
+    owner: root
+  loop: "{{ logrotate_conf }}"
+  become: yes
+
+- name: LOGROTATE > Check the changes
+  shell: logrotate -v -f /etc/logrotate.conf
+  become: yes

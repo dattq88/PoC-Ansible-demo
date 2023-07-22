@@ -1,0 +1,28 @@
+# Path Manager: Run Command with Tags Name (Packer)
+- name: PATCH SECURITY > get instance-ids
+  command:
+    curl http://169.254.169.254/latest/meta-data/instance-id
+  register: instance_id
+- debug: var=instance_id.stdout
+- set_fact: instance_id={{ instance_id.stdout }}
+
+- name: PATCH SECURITY > run batch security with send-command
+  command: aws ssm send-command --region {{ region }} --document-name "AWS-RunPatchBaseline" --document-version "$DEFAULT" --instance-ids {{ instance_id }} --parameters '{"Operation":["Install"],"RebootOption":["NoReboot"]}' --timeout-seconds 3600 --output text --query "Command.CommandId"
+  register: command_id
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+- debug: var=command_id.stdout
+- set_fact: command_id={{ command_id.stdout }}
+
+- name: PATCH SECURITY > check status run batch security with list-commands
+  command: aws ssm list-commands --region {{ region }} --command-id "{{ command_id }}" --output text --query 'Commands[].Status'
+  register: statuscommandid
+  until: statuscommandid.stdout.find("Success") != -1
+  retries: 30
+  delay: 10
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+- debug: var=statuscommandid.stdout
+- set_fact: statuscommandid={{ statuscommandid.stdout }}

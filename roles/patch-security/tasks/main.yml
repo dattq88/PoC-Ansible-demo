@@ -1,0 +1,14 @@
+# Config and check SSM Agent before running Patch Security tasks
+
+- name:  SSM AGENT
+  import_tasks: 'ssm-agent.yml'
+  become: yes
+
+- name:  SSM AGENT SETTING LOGS
+  import_tasks: 'ssm-agent-setting-logs.yml'
+  become: yes
+
+- name: PATCH SECURITY
+  import_tasks: 'patch-security.yml'
+  become_user: '{{ deploy_user }}'
+  become: yes

@@ -1,0 +1,57 @@
+- name: Newrelic-nginx > Add the New Relic Infrastructure Agent gpg key 
+  apt_key:
+    url: https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg
+    state: present
+  become: yes
+
+- name: Newrelic-nginx > Create a configuration file, add your license key and Create the agent’s yum repository 
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+    create: yes
+  loop:
+    - { path: '/etc/newrelic-infra.yml', line: 'license_key: {{ newrelic_license_key }}' }
+    - { path: '/etc/newrelic-infra.yml', line: 'display_name: {{ project }}-{{ type }}-instance-{{ env }}' }
+    - { path: '/etc/apt/sources.list.d/newrelic-infra.list', line: 'deb [arch=amd64] https://download.newrelic.com/infrastructure_agent/linux/apt bionic main' }
+  become: yes
+
+- name: Newrelic-nginx > Update repositories cache, Install newrelic-infra & nginx monitor packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - newrelic-infra
+    - nri-nginx
+  become: yes
+
+- name: Newrelic-nginx > Copy nginx-config.yml
+  template:
+    src: "nginx-config.yml.j2"
+    dest: "/etc/newrelic-infra/integrations.d/nginx-config.yml"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Newrelic-nginx > Restart newrelic-infra
+  become: yes
+
+- name: Newrelic-nginx > Check the regex line exists or not?
+  shell: 'cat {{ nginx_conf_dir }}/sites-available/{{ type }}-config.conf | grep "try_files \$uri\/index.html \$uri @puma;"'
+  register: grep_output
+- debug: var=grep_output.stdout_lines
+  failed_when: ( grep_output.rc > 0 )
+
+- name: Newrelic-nginx > Add location for newrelic-infra
+  blockinfile:
+    path: "{{ nginx_conf_dir }}/sites-available/{{ type }}-config.conf"
+    insertafter: 'try_files \$uri\/index.html \$uri @puma;'
+    block: |2
+          location /nginx_status {
+            stub_status;
+            allow 127.0.0.1;        #only allow requests from localhost
+            deny all;               #deny all other hosts
+          }
+  notify:
+    - Newrelic-nginx > Reload nginx
+  become: yes

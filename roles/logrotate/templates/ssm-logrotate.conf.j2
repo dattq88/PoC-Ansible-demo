@@ -1,0 +1,21 @@
+{{ ssm_agent_log_path }}
+{
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    sharedscripts
+}
+
+{{ ssm_error_log_path }}
+{
+    monthly
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    sharedscripts
+}

@@ -1,0 +1,18 @@
+- name: WP-CLI > Check if wp-cli exists
+  become: yes
+  stat: path="{{ root_bin }}/wp"
+  register: wpcli_exist
+
+- name: WP-CLI > Updating wp-cli
+  become: yes
+  shell: "{{ root_bin }}/wp cli update --yes"
+  when: wpcli_exist.stat.exists
+
+- name: WP-CLI > Download wp-cli
+  become: yes
+  get_url:
+    url="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
+    dest="{{ root_bin }}/wp"
+    force_basic_auth=yes
+    mode=0755
+  when: not wpcli_exist.stat.exists

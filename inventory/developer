@@ -1,0 +1,8 @@
+[tag_Role_bastion]
+
+[tag_Role_admin]
+
+[tag_Env_dev:children]
+tag_Role_bastion
+tag_Role_admin
+

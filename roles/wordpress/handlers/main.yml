@@ -1,0 +1,28 @@
+- name: WORDPRESS > restart php-fpm
+  become: yes
+  service:
+   name: php{{php_version}}-fpm
+   state: restarted
+  listen: wordpress_installed
+
+# Reload nginx
+- name: reload nginx
+  debug: msg="checking config first"
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - reload nginx - after config check
+  become: yes
+
+- name: check nginx configuration
+  command: "nginx -t -c {{ nginx_conf_dir }}/nginx.conf"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: no
+  become: yes
+
+- name: reload nginx - after config check
+  service:
+    name:  nginx
+    state: reloaded
+  become: yes

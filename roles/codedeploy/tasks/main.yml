@@ -1,0 +1,52 @@
+---
+- name: CodeDeploy > Download CodeDeployAgent deb package
+  get_url:
+    url: https://aws-codedeploy-{{ region }}.s3.{{ region }}.amazonaws.com/latest/install
+    dest: /tmp/install
+    mode: 0755
+  check_mode: no
+  become: yes
+
+
+- name: CodeDeploy > Install ruby
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - ruby
+  become: yes
+
+
+- name: CodeDeploy > Check ruby
+  shell: /usr/bin/ruby --version
+  args:
+    executable: /bin/bash
+  become: yes
+  register: ruby_ver
+- debug: var=ruby_ver
+
+
+- name: CodeDeploy > Install CodeDeployAgent package
+  shell: /usr/bin/ruby ./install auto
+  args:
+    chdir: /tmp
+    executable: /bin/bash
+  become: yes
+  notify: "Restart CodedeployAgent"
+
+
+- name: CodeDeploy > Ensure start CodedeployAgent
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: codedeploy-agent
+  become: yes
+
+
+- name: CodeDeploy > Determine the version
+  shell: dpkg -s codedeploy-agent
+  become: yes
+  register: codedeploy_ver
+- debug: var=codedeploy_ver

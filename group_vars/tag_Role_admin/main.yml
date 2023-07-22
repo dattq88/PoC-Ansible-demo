@@ -1,0 +1,67 @@
+type: admin
+
+# Roles/nginx
+server_name: "{{ type }}.{{ domain }}"
+
+# Role/cloudwatch logs
+log_group_type:
+    sys_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ sys_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    auth_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ auth_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    access_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ nginx_access_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    error_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ nginx_error_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    server_name_access_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ app_nginx_access_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    server_name_error_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ app_nginx_error_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    rails_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ app_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    paygent_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ paygent_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    codedeploy_agent_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ codedeploy_agent_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    codedeploy_agent_update_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ codedeploy_update_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    codedeploy_agent_deployments_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ codedeploy_deployment_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    ssm_agent_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ ssm_agent_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+    ssm_error_log_group:
+        name: "{{ project }}-{{ region }}-{{ env }}-{{ type }}-{{ ssm_error_log_path }}"
+        retention: "{{ '30' if env!='prod' else '90' }}"
+
+# Role/fluentd-agent
+fluentd_agent_conf:
+  - auth.conf.j2
+  - syslog.conf.j2
+  - rails_app.conf.j2
+  - paygent_app.conf.j2
+  - nginx-error.conf.j2
+  - nginx-access.conf.j2
+  - app-nginx-error.conf.j2
+  - app-nginx-access.conf.j2
+  - codedeploy-agent.conf.j2
+  - codedeploy-deployments.conf.j2
+  - ssm-agent.conf.j2
+  - ssm-error.conf.j2
+
+# Role/logrotate
+logrotate_conf:
+  - codedeploy-logrotate.conf.j2
+  - rails-logrotate.conf.j2
+  - ssm-logrotate.conf.j2

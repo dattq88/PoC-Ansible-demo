@@ -1,0 +1,42 @@
+<source>
+  @type tail
+  path {{ pm2_platform_out_log_path }}
+  pos_file /var/log/td-agent/pm2-platform-out-log.pos
+  format none
+  tag pm2-platform-out-log
+</source>
+
+<match pm2-platform-out-log>
+  @type ec2_metadata
+  output_tag ${instance_id}.${tag}
+</match>
+
+<match i-**.pm2-platform-out-log>
+  @type forest
+  subtype s3
+  <template>
+    <instance_profile_credentials>
+      ip_address 169.254.169.254
+      port 80
+    </instance_profile_credentials>
+
+    s3_bucket {{ project }}-logs-{{ env }}
+    s3_region {{ region }}
+    path ec2-logs/{{ type }}/${tag_parts[0]}/pm2-platform-out-log/
+    store_as gzip
+    s3_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+    time_slice_format %Y%m%d%H%M
+    slow_flush_log_threshold 60s
+
+    <buffer>
+      timekey 60
+      chunk_limit_size 8M
+      queue_limit_length 32
+      flush_mode interval
+      flush_interval 5s
+      overflow_action drop_oldest_chunk
+      retry_forever true
+      retry_max_interval 30
+    </buffer>
+  </template>
+</match>

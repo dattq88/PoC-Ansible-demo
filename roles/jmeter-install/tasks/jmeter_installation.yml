@@ -1,0 +1,42 @@
+# Install openjdk 11
+- name: JMETER-INSTALL > Install openjdk 11
+  apt:
+    name: openjdk-11-jdk
+    state: present
+    update-cache: yes
+
+
+# Create folder for jmeter
+- name: JMETER-INSTALL > Create jmeter directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ jmeter_prefix }}"
+    - "{{ jmeter_plugins_prefix }}"
+    - "{{ jmeter_scenarii_dir }}"
+    - "{{ jmeter_tmp_dir }}"
+
+
+# Detect folder jmeter exists
+- name: JMETER-INSTALL > Detect folder jmeter
+  stat: path={{ jmeter_bin }}
+  register: jmeter_bin_stat
+
+
+# Download jmeter version {{ jmeter_version }}
+- name: JMETER-INSTALL > Download jmeter version {{ jmeter_version }} from apache.org
+  unarchive:
+    src: "http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz"
+    dest: "{{ jmeter_prefix }}" #jmeter_prefix: "/usr/local"
+    remote_src: yes
+  when: not jmeter_bin_stat.stat.exists
+
+
+# Jmeter symlink to current version
+- name: JMETER-INSTALL > Create {{ jmeter_prefix }}/jmeter symlink
+  file:
+    src: "{{ jmeter_prefix }}/apache-jmeter-{{ jmeter_version }}"
+    dest: "{{ jmeter_prefix }}/jmeter"
+    state: link

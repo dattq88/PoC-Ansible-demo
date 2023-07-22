@@ -1,0 +1,23 @@
+# Configure file bin/user.properties
+# Set "server.rmi.ssl.disable=true"
+- name: JMETER-INSTALL > Copy file user-setting to user.properties
+  template:
+    src: user-setting.properties.j2
+    dest: "{{ jmeter_prefix }}/jmeter/bin/user.properties" #jmeter_prefix: "/usr/local"
+    mode: 0644
+
+
+# Configure file bin/jmeter
+# Set JVM_ARGS with java_min & java_max
+- name: JMETER-INSTALL > Copy jmeter configuration file to user.properties
+  template:
+    src: jmeter.j2
+    dest: "{{ jmeter_prefix }}/jmeter/bin/jmeter" #jmeter_root_dir: "{{ jmeter_prefix }}/apache-jmeter-{{ jmeter_version }}"
+    mode: 0755
+
+
+# Check version Jmeter
+- name: JMETER-INSTALL > Jmeter version check
+  command: "{{ jmeter_prefix }}/jmeter/bin/jmeter -n --version"
+  register: jmeter_versions
+- debug: var=jmeter_versions.stdout_lines

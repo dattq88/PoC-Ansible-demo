@@ -1,0 +1,21 @@
+#
+ubuntu_user_list:
+  - { user_name: "{{ ansible_ssh_user }}" }
+deploy_user_list:
+  - { user_name: "{{ deploy_user }}", groups_name: "admin,sudo" }
+all_user_lists:
+  # Dev User
+  - { user_name: "anhbt19", groups_name: "sudo" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCisDkns6eZNo2V6cxQSbHBQ2Lxj3ji6/JbKHM7l8lkOC7w/LOOXGOp1TdkLtEbIM1zCttxoeIIwOooZ/8IFE4Lxp3BsV/YuJe6N2B7S9ulty8onMDxiKpwwFoMQ1W4W6WAplY/AebIL3K1gz7SVilUukXygwxss3EoH7aCjh4WPuJobS4O2pYEQcVlPYQRCVh8lNJoNlur0EhvycLvi9dBSJPNHTduuUtt+uEDTGG4X2ehmlHZs8SmoLnRPvxoDueI9gXnJBaMqHIMR2hBn+xQOKrATwKc8LEUQctRJixgRiAagUDWIXW6/sW4m6xDgM0vPpkN2iXvF0WmnZnD+JvJ user" }
+  # Infra User
+  - { user_name: "nguyengt", groups_name: "sudo" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCb+qwgH9dWKfALZJqzng6xVK27BO0zv4OEIw8l/21/3UM53WC9NKvGDJ29cc7PCd1k8Y4Jcz3K1SBI1ule4+wDyHnTO+f/Y9KS0zN7ME5mEbvYfMCwZtxewvAYxydlA0Xs02v9/CpyPukuHKA4ydiex6TVAsH1RrcBRrZ9Rh6CFXO8hexNFuDL/2JxxNY3A0AexYmg6Hq0gvedNOfplS93sUSrKFpmd5T+6QmMEOHLxiygGTPWAPjHvnl5rExgU0QJllDxkMgbx++nvfMLhF3oOV7m9iw5lX/qGn7YPpZHbEoYtxpWl3RjQ0cb6yO29ADseW8uvdrAIOAWQR8v9lz1 user" }
+  - { user_name: "anhbt19", groups_name: "sudo" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzEs81DTOpkV5ELUikEuqJfeXXnxaE2eyFo03X9Kpp4isCVYrvujOYCn3q30FSvZQ6jCruhlL47sRp0OoCFW4YoaeZXNxOSII1hXmoMlQE+ckOTc5MZFs/FhJp04Pj8jq9U6qhSt8c6iA5cfhNOQjIVZGd4TRp4wPGfvT3Vwd/ZoQomBbwg0zP0IXFlc9eV/HsL4f3Zoy5sjUWK2b/KuPYwzN1zmCUvbLFgPj9wq4sWjlbo5G+BrzIhRYEcxJ5hW/9z8gZwcIdKs7qOtvsc4FLZ/PpFsP7kL2JWCQe5hvQc/MTfjshSxaxeXN4MSoeYeQNI2ol/pmSl4V4YFqSdElp user" }
+
+dev_user_lists:
+  - { user_name: "dev1", groups_name: "" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAppu/p5fObtlElXI8LA3qmZCZHUJ0iJlw+hz/KI94n7oyuEPLj19zU2lgOW6yZ4ke9FSmqiBgXmaEarsGIhdbxzLSMWMPA7nCTabcex0TDd8qpRG+6OGpD4nxx+IPl1ScJfpQYPX/cg6qAF5KQ52s2wetpdKSmFYKxfMfbNo1IVPXuosovRFpZeUStpKmYQ+1X+DRFWtRW0dKSlcNlr0E5oB0PImGIzBWH5JCECosoilMu+4W1/HXn1pSTNMNR78cZvQjya4JXfGy9LmJ7XfkPosVeS0aLs5mUxH7Y9WQgBcM6oM92SwqlmPFewFsfwT0rPCdKIV+QzQVZjv1dD5oDQ== user" }
+  - { user_name: "dev2", groups_name: "" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAyLI30lQSYas7YC/h55uIcthbIW6ZVAqLF/XQQWmh1pomAnZ+RPhRp0P5jsayifZhKORMqHCUBG8o2uayOt6VVvMo1+/e/oTMQB5LbTSBvJSlvBiPy8yXvtoe2o+wUdPmkeiop+nhhG3x0UAjAeRjA6Ywskd//8+EiaLXIyrACPPpRfHxDjD2Mbwl+V3VO+I5WtN6E2MpkEy/SXpn/MfFw/wFOHpaZXPwqjsIvS0UmAPbKsx+9rh8Z7c9JviSkiWKaJT9reEOeUKqUlJe+upL7WKs4JmOys6pf6j1oMxwG0fvErPBLMlI2F8ca09iwYKl/3ILZkVEKfuAD+rkgAoRMw== user" }
+
+stg_user_lists:
+  - { user_name: "stg1", groups_name: "" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC7jghWJlWOzg3C5L1U4LhTvrnPuFnqZ+cQtnCajJ8L/Be/ZrxgyrswtIZGiVz4Ku75FjLUm7Hqy8iYznX6oOhW/1JSR1Y10VjvrjfNxf0uwvxdwuDfWTnGTgv5kLMB9k66I4cpEvunSfdatRt0cTTnFO8dIL83id4zau96h/uICeBwlQ/0cgY5xJopUlM1u9BHpIbvG7n/URegii+yH2JOaj/phglOI+foLphW0D0ecpC8h6ghyym7MpBaIXZHRYCNgTnT3lB5GA2JDsQgjvLJ4ux5k+QvGoh8mFj0CX34yZZ+HPXl3NyLOYprv6lnX6Dk9FxJiLbiB6HENAtW6m4gultgxC8n8S0ZRp43axgNoWCP25LBtKwGsoIK3pzAjPUx3KsFUmBbiy6WaH9m+LTfkzYHCm6WBRI0b9MxNG3tHfTB0pDun29sTns6Sy/iA5D0oyJ/qaheTkwbveiyI4K4e2AQOJV333n9Idm/MSz+lypn9M//7tmMc0uJFXa3oKqA/kf94f1bGR7k6Z9gHlpLJ8TrD8XfBjdbjiIditRpVzwmDsvJMqIoz10yRiyfprfIWD9jvrms3AYXjFHCdPRlIe4tKEUbpH58w+H0Ik8SmxoPygepBZ0s+2eRuTt/Y+eMRGCeV9BkFpGGO3R1Ho7RdjsHoJ1WrZvxpOaccOKqyQ== stg1" }
+  - { user_name: "stg2", groups_name: "" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDog4qukTWAEsLNfWeEynexiDrfsFf99i4dSsKJgxJ/I/a+4xrq5mjm7PFrv5kqSRmzvb/WQqQN9deQN54h0grjEdwCdoKCp1QVb22Sg5uOQXUoydTdX5IsdTaTJsnmkeD6WF84z+DyX99rI4wyMPNidQDgkMNwHe/T041n7GbQim5vcruZv32xNVfsqgcA7gEgSsDfhaG12y1Lth+zQNh6lMvGE0D8dzPqcUFtxysl+CFZdF/Cl47vncGKMo8+VclxEfH5NfKe6FFEOwbgdt1Dm++Qa4QnY/rCTs8JxzHjMGggyqUIb/x+Q2QxnFHulgfGWsDYDbLX3Ad8F7WAC9FRzM2vStjbMreF4o3XkB8SsU92JxvU25WQeakLtS11pKO7zhQtylUWBpri8RQ3W2o/Q8im6UtBhOG5lSA9v+LZN3LASVTrlE/rXrSUC7FaXArxU0J744eFReLmm3Lb3zZVTpJ9ovq6GtzOrAAjF+6mqmdJT77sVBvL5WmNvSJrGBWey+qKOY+YerdRO9w0SEd9v0CwVDIuL9Ubvhbb4bNWvh5JFJZijZDN5yUxMPl9GRhotdgw5y1Vs9qWgTQ6LgZu2kSqema3VJyd7kGaF+yvfxsVExFMfbuJWZem1FIpw8eqvjRIBXPlB84JeVZrj6KUKJgf000pIF8P7n3T6WXkxw== stg2" }
+
+prod_user_lists:

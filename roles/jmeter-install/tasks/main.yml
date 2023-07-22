@@ -1,0 +1,24 @@
+# Install Jmeter-server
+- name: JMETER-INSTALL > Install Jmeter-server
+  import_tasks: jmeter_installation.yml
+  become: yes
+
+
+# Config Jmeter-server
+- name: JMETER-INSTALL > Config Jmeter-server
+  import_tasks: jmeter_config.yml
+  become: yes
+
+
+# Export PATH
+- name: JMETER-INSTALL > Export PATH
+  include: jmeter_export_path.yml
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+
+
+# Install libmysql-java
+- name: JMETER-INSTALL > Install libmysql-java
+  import_tasks: jmeter_install_libmysql_java.yml
+  become: yes

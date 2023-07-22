@@ -1,0 +1,60 @@
+- name: WORDPRESS > Download latest version
+  become: yes
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/wp-source-micro.tar.gz
+
+- name: WORDPRESS > Create directory for source web
+  become: yes
+  file:
+    path: "{{ wp_source_path }}"
+    state: directory
+    mode: '0755'
+
+- name: WORDPRESS > Extract gz file
+  become: yes
+  unarchive:
+    src: /tmp/wp-source-micro.tar.gz
+    dest: "{{ wp_source_path }}"
+    extra_opts: [--strip-components=1]
+    remote_src: yes
+
+- name: WORDPRESS > Change Owner wordpress_file
+  become: yes
+  file:
+    path: "{{ wp_source_path }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: '0755'
+    recurse: yes
+
+- name: WORDPRESS > GET WP_SALT
+  become: yes
+  command: curl https://api.wordpress.org/secret-key/1.1/salt/
+  register: wordpress_salt
+
+- name: WORDPRESS > Update config file
+  become: yes
+  template:
+    src: wp-config.php
+    dest: "{{ wp_source_path }}/wp-config.php"
+  notify: wordpress_installed
+
+- name: WORDPRESS > Remove default site into Nginx
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: WORDPRESS > Add file web config nginx
+  become: yes
+  file:
+    src:  /etc/nginx/sites-available/{{ type }}-config.conf
+    dest: /etc/nginx/sites-enabled/{{ type }}-config.conf
+    state: link
+
+- name: WORDPRESS > Reload nginx
+  shell: echo "Reload nginx"
+  notify: reload nginx
+  become: yes
+  tags: [ wp_platform_nginx_211220 ]

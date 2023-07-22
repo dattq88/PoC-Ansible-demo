@@ -1,0 +1,22 @@
+# create path project
+- name: CRON-WITH-RVM > Create path project
+  become: yes
+  file:
+   path: "{{ item }}"
+   state: directory
+   owner: "{{ deploy_user }}"
+   group: "{{ deploy_user }}"
+  loop:
+    - "{{ app_path }}"
+    - "{{ app_path_project }}"
+    - "{{ app_path_project }}/releases"
+    - "{{ app_path_project }}/shared"
+    - "{{ app_path_project }}/shared/log"
+    - "{{ app_path_project }}/shared/config"
+    - "{{ app_path_project }}/shared/public"
+    - "{{ app_path_project }}/shared/public/system"
+    - "{{ app_path_project }}/shared/public/uploads"
+    - "{{ app_path_project }}/shared/public/assets"
+    - "{{ app_path_project }}/shared/tmp"
+    - "{{ app_path_project }}/shared/tmp/pids"
+    - "{{ app_path_project }}/shared/tmp/sockets"

@@ -1,0 +1,26 @@
+- name: SSM AGENT > check list ssm-agent on Server
+  command: snap list amazon-ssm-agent
+  register: list_ssm_agent
+- debug: var=list_ssm_agent.stdout_lines
+
+- name: SSM AGENT > check status ssm-agent on Server
+  shell: snap services amazon-ssm-agent | grep enabled | grep -o active
+  register: status_ssm_agent
+- debug: var=status_ssm_agent.stdout_lines
+  failed_when: "'active' not in status_ssm_agent.stdout_lines"
+
+- name: SSM AGENT > Check and upgrade version of amazon-ssm-agent service
+  shell: snap refresh amazon-ssm-agent 
+  register: refresh_ssm_agent
+- debug: var=refresh_ssm_agent.stdout_lines
+
+- name: SSM AGENT > Change schedule time update/upgrade services of snap
+  shell: "{{ item }}"
+  loop:
+  - snap set system refresh.timer=01:00-03:00
+  - snap set system refresh.hold="$(date --date=tomorrow +%Y-%m-%dT01:00:00%:z)"
+
+- name: SSM AGENT > Check schedule time of snap
+  shell: snap refresh --time
+  register: refresh_time_ssm_agent
+- debug: var=refresh_time_ssm_agent.stdout_lines

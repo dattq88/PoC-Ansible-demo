@@ -1,0 +1,7 @@
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html#mon-script-troubleshooting
+- name: Delete instance-id in rm /var/tmp/aws-mon/instance-id
+  file:
+    path: /var/tmp/aws-mon/instance-id
+    state: absent
+  become_user: "{{ deploy_user }}"
+  become: yes

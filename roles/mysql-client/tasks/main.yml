@@ -1,0 +1,10 @@
+# Install mysql-client
+- name: Mysql-client > Install Mysql-client
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - mysql-client-{{ mysql_client_version }}
+    - libmysqlclient-dev
+  become: yes

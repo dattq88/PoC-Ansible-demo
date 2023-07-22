@@ -1,0 +1,7 @@
+# Export PATH=/usr/local/jmeter/bin:$PATH
+- name: JMETER-INSTALL > Export PATH=/usr/local/jmeter/bin:$PATH
+  shell: | #/usr/local/jmeter/bin
+    echo "export PATH={{ jmeter_prefix }}/jmeter/bin:$PATH" >> .bashrc
+  args:
+    executable: /bin/bash
+    chdir: /home/{{ deploy_user }}

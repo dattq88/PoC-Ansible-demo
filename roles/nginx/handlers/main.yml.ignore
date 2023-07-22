@@ -1,0 +1,35 @@
+# Restart and reload nginx
+- name: restart nginx
+  debug: msg="checking config first"
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - restart nginx - after config check
+  become: yes
+
+- name: reload nginx
+  debug: msg="checking config first"
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - reload nginx - after config check
+  become: yes
+
+- name: check nginx configuration
+  command: "nginx -t -c {{ nginx_conf_dir }}/nginx.conf"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: no
+  become: yes
+
+- name: restart nginx - after config check
+  service: 
+    name:  nginx
+    state: restarted
+  become: yes
+
+- name: reload nginx - after config check
+  service: 
+    name:  nginx
+    state: reloaded
+  become: yes

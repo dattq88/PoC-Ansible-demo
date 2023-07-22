@@ -1,0 +1,4 @@
+wp_db_charset: utf8
+wp_db_collate: utf8_general_ci
+
+nginx_conf_dir: "/etc/nginx"

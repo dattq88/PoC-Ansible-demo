@@ -1,0 +1,21 @@
+- hosts: tag_Role_admin
+
+  remote_user: "{{ ansible_ssh_user }}"
+  become_method: sudo
+  gather_facts: yes
+
+  roles:
+    - base
+    - ssh-users
+    - aws-cli
+    - disable-auto-upgrade
+    - hostname
+    - patch-security
+    - distribute-key
+    - nginx
+    - mysql-client
+    - codedeploy
+    - logrotate
+    - fluentd-agent
+    - cloudwatch-log
+    - cloudwatch-metric

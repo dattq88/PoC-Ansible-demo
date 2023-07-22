@@ -1,0 +1,66 @@
+# Install the nginx packages for Ubuntu target
+- name: NGINX > Install nginx
+  apt:
+    name: nginx
+    update-cache: yes
+  become: yes
+
+- name: NGINX > Check nginx status
+  shell: bash -lc "systemctl status nginx"
+  register: nginx_status
+- debug: var=nginx_status.stdout_lines
+
+- name: NGINX > Copy configuration files "nginx.conf"
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/nginx.conf"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  tags: [ wp_platform_nginx_211220 ]
+
+# Enable Nginx
+- name: NGINX > Enable service nginx
+  systemd:
+    name: nginx
+    enabled: yes
+  become: yes
+
+# Set Basic Authen
+- name: NGINX > Copy the basic-authen file
+  template:
+    src: ".{{ type }}-htpasswd.j2"
+    dest: "{{ nginx_conf_dir }}/.htpasswd"
+  when: type=="front"
+  become: yes
+
+# Create config nginx
+- name: NGINX --> Copy {{ type }}-config.conf file to {{ nginx_conf_dir }}/sites-available
+  template:
+    src: "{{ type }}-config.conf.j2"
+    dest: "{{nginx_conf_dir}}/sites-available/{{ type }}-config.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: type=="api" or type=="admin" or type=="cons" or type=="front"
+  become: yes
+  tags: [ wp_platform_nginx_211220 ]
+
+# Create nginx error 5xx template
+- name: NGINX --> Copy {{ type }} custom_5xx.html file to {{ nginx_conf_dir }}/custom_5xx.html
+  template:
+    src: "custom_5xx.html.j2"
+    dest: "{{nginx_conf_dir}}/custom_5xx.html"
+    owner: root
+    group: root
+    mode: 0644
+  when: type=="cons"
+  become: yes
+
+# Restart Nginx
+- name: NGINX > Restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes

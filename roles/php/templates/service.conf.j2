@@ -1,0 +1,111 @@
+[www]
+
+; Per pool prefix
+; It only applies on the following directives:
+; - 'access.log'
+; - 'slowlog'
+; - 'listen' (unixsocket)
+; - 'chroot'
+; - 'chdir'
+; - 'php_values'
+; - 'php_admin_values'
+; When not set, the global prefix (or /usr) applies instead.
+; Note: This directive can also be relative to the global prefix.
+; Default Value: none
+;prefix = /path/to/pools/$pool
+
+; Unix user/group of processes
+user = {{ user_fpm }}
+group = {{ group_fpm }}
+
+;listen = /run/php/php7.3-fpm.sock
+listen = 127.0.0.1:9000
+
+; Set listen(2) backlog.
+;listen.backlog = 511
+
+listen.owner = {{ user_fpm }}
+listen.group = {{ group_fpm }}
+listen.mode = 0660
+
+listen.allowed_clients = 127.0.0.1
+
+
+pm = dynamic
+
+pm.max_children = {{ (ansible_memtotal_mb/100)|int }}
+
+; The number of child processes created on startup.
+; Note: Used only when pm is set to 'dynamic'
+; Default Value: min_spare_servers + (max_spare_servers - min_spare_servers) / 2
+pm.start_servers = {{ ansible_processor_cores*2 }}
+
+; The desired minimum number of idle server processes.
+; Note: Used only when pm is set to 'dynamic'
+; Note: Mandatory when pm is set to 'dynamic'
+pm.min_spare_servers = {{ ansible_processor_cores*2 }}
+
+; The desired maximum number of idle server processes.
+; Note: Used only when pm is set to 'dynamic'
+; Note: Mandatory when pm is set to 'dynamic'
+pm.max_spare_servers = {{ ansible_processor_cores*4 }}
+
+; The number of seconds after which an idle process will be killed.
+; Note: Used only when pm is set to 'ondemand'
+; Default Value: 10s
+;pm.process_idle_timeout = 10s;
+
+; The number of requests each child process should execute before respawning.
+; This can be useful to work around memory leaks in 3rd party libraries. For
+; endless request processing specify '0'. Equivalent to PHP_FCGI_MAX_REQUESTS.
+; Default Value: 0
+pm.max_requests = 500
+
+pm.status_path = /status
+
+; The access log file
+; Default: not set
+access.log = /var/log/{{ php_version }}/$pool.access.log
+
+; Access log format
+; Default: "%R - %u %t \"%m %r\" %s"
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+
+; The log file for slow requests
+; Default Value: not set
+; Note: slowlog is mandatory if request_slowlog_timeout is set
+slowlog = /var/log/{{ php_version }}/$pool.log.slow
+
+; The timeout for serving a single request after which a PHP backtrace will be
+; dumped to the 'slowlog' file. A value of '0s' means 'off'.
+; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
+; Default Value: 0
+;request_slowlog_timeout = 0
+
+; Depth of slow log stack trace.
+; Default Value: 20
+;request_slowlog_trace_depth = 20
+
+; The timeout for serving a single request after which the worker process will
+; be killed. This option should be used when the 'max_execution_time' ini option
+; does not stop script execution for some reason. A value of '0' means 'off'.
+; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
+; Default Value: 0
+;request_terminate_timeout = 0
+
+; Set open file descriptor rlimit.
+; Default Value: system defined value
+;rlimit_files = 1024
+
+; Set max core size rlimit.
+; Possible Values: 'unlimited' or an integer greater or equal to 0
+; Default Value: system defined value
+;rlimit_core = 0
+
+; Default Value: nothing is defined by default except the values in php.ini and
+;                specified at startup with the -d argument
+;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f www@my.domain.com
+;php_flag[display_errors] = off
+;php_admin_value[error_log] = /var/log/fpm-php.www.log
+;php_admin_flag[log_errors] = on
+;php_admin_value[memory_limit] = 32M

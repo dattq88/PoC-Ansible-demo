@@ -1,0 +1,72 @@
+- name: CLOUDWATCH LOG > describe-log-groups
+  shell: aws logs describe-log-groups --region {{ region }} --log-group-name-prefix {{ item.value.name }} --query 'logGroups[*].[logGroupName]' --output text
+  register: log_group_name
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+  args:
+    executable: /bin/bash
+  loop: "{{ lookup('dict', log_group_type) }}"
+- debug: var=log_group_name.results
+- set_fact: log_group_name={{ log_group_name.results }}
+
+- name: CLOUDWATCH LOG > create-log-group and put-retention-policy
+  shell: |
+    aws logs create-log-group --region {{ region }} --log-group-name {{ item.item.value.name }}
+    aws logs put-retention-policy --region {{ region }} --log-group-name {{ item.item.value.name }} --retention-in-days {{ item.item.value.retention }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+  args:
+    executable: /bin/bash
+  when: item.stdout==''
+  loop: "{{ log_group_name }}"
+
+- name: CLOUDWATCH LOG > put-retention-policy
+  shell: aws logs put-retention-policy --region {{ region }} --log-group-name {{ item.item.value.name }} --retention-in-days {{ item.item.value.retention }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+  args:
+    executable: /bin/bash
+  when:
+    - item.stdout!=''
+  loop: "{{ log_group_name }}"
+#----------------------------------------------------------------------------------------------
+- name: CLOUDWATCH LOG > Put a config file {{ type }} in place
+  template:
+    src: logs-{{ type }}.conf.j2
+    dest: /tmp/awslogs.conf
+    mode: 0600
+    group: root
+    owner: root
+  become: yes
+
+# Download the monitoring scripts
+- name: CLOUDWATCH LOG > Get logs scripts
+  get_url: 
+    url: "https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
+    dest: "/home/{{ deploy_user }}/awslogs-agent-setup.py"
+    mode: 0644
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: CLOUDWATCH LOG > Run script
+  command: python ./awslogs-agent-setup.py -n --region {{ region }} -c /tmp/awslogs.conf
+  args:
+    chdir: /home/{{ deploy_user }}
+  become: yes
+
+- name: CLOUDWATCH LOG > Enable awslogs
+  become: yes
+  service:
+    name: awslogs
+    enabled: yes
+
+- name: CLOUDWATCH LOG > Start awslogs
+  become: yes
+  service: 
+    name: awslogs
+    state: started

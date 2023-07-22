@@ -1,0 +1,11 @@
+- name: Newrelic-nginx > Restart newrelic-infra
+  service: 
+    name: newrelic-infra
+    state: restarted
+  become: yes
+
+- name: Newrelic-nginx > Reload nginx
+  service: 
+    name:  nginx
+    state: reloaded
+  become: yes

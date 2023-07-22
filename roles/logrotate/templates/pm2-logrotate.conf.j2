@@ -1,0 +1,21 @@
+/home/{{ deploy_user }}/.pm2/pm2.log {
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    su {{ deploy_user }} {{ deploy_user }}
+    sharedscripts
+}
+
+/home/{{ deploy_user }}/.pm2/logs/*.log {
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    su {{ deploy_user }} {{ deploy_user }}
+    sharedscripts
+}

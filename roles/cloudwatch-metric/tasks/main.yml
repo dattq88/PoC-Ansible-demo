@@ -1,0 +1,78 @@
+- name: CLOUDWATCH METRIC > Install for CloudWatch Metric monitoring scripts
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - unzip
+    - libwww-perl
+    - libdatetime-perl
+  become: yes
+
+# Download the monitoring scripts
+- name: CLOUDWATCH METRIC > Get monitoring scripts
+  get_url:
+    url: "https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip"
+    dest: "/home/{{ deploy_user }}/CloudWatchMonitoringScripts-1.2.2.zip"
+    mode: 0644
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become_user: "{{ deploy_user }}"
+  become: yes
+# Install, and configure the monitoring scripts
+- name: CLOUDWATCH METRIC > Check that the "aws-scripts-mon" exists
+  stat:
+    path: /home/{{ deploy_user }}/aws-scripts-mon
+  register: check_scripts_result
+
+- name: CLOUDWATCH METRIC > Unzip Scripts
+  command: unzip CloudWatchMonitoringScripts-1.2.2.zip
+  args:
+    chdir: /home/{{ deploy_user }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  when: check_scripts_result.stat.exists == False
+
+# Set Cronjob for Instance
+- name: CLOUDWATCH METRIC > Set cronjob every five minutes for Instance
+  cron:
+    name: "Push Metric to CloudWatch for Instance"
+    minute: "*/5"
+    hour: "*"
+    job: "/home/{{ deploy_user }}/aws-scripts-mon/mon-put-instance-data.pl --mem-util --mem-used --mem-avail --disk-space-util  --disk-space-used --disk-space-avail --disk-path=/ --from-cron"
+  become_user: "{{ deploy_user }}"
+  become: yes
+  notify:
+    - Delete instance-id in rm /var/tmp/aws-mon/instance-id
+
+# Set Cronjob for AutoScalingGroup
+- name: CLOUDWATCH METRIC > Set cronjob every five minutes for AutoScalingGroup
+  cron:
+    name: "Push Metric to CloudWatch for AutoScalingGroup"
+    minute: "*/5"
+    hour: "*"
+    job: "/home/{{ deploy_user }}/aws-scripts-mon/mon-put-instance-data.pl --mem-util --mem-used --mem-avail --disk-space-util  --disk-space-used --disk-space-avail --disk-path=/ --auto-scaling=only --from-cron"
+  become_user: "{{ deploy_user }}"
+  become: yes
+  when: type=="api" or type=="admin" or type=="batch" or type=="worker" or type=="cons"
+  notify:
+    - Delete instance-id in rm /var/tmp/aws-mon/instance-id
+
+- name: CLOUDWATCH METRIC > Queries CloudWatch for statistics within the time interval
+  shell: ./mon-get-instance-stats.pl --recent-hours=12
+  args:
+    chdir: /home/{{ deploy_user }}/aws-scripts-mon
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: CLOUDWATCH METRIC > Create as-group-name file for AutoScalingGroup to push metric
+  copy:
+    dest: "/var/tmp/aws-mon/as-group-name"
+    content: |
+      {{ project }}-{{ type }}-autoscale-group-{{ env }}
+    mode: 0644
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become_user: "{{ deploy_user }}"
+  become: yes
+  when: type=="api" or type=="admin" or type=="batch" or type=="worker" or type=="cons"

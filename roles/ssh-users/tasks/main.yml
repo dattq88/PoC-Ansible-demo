@@ -1,0 +1,49 @@
+# Create & config ssh user
+- name: SSH-Users > Create ssh user
+  user:
+    name: "{{ item.user_name }}"
+    groups: "{{ item.groups_name }}"
+    shell: /bin/bash
+    append: yes
+    createhome: yes
+  loop: "{{ (deploy_user_list, all_user_lists, vars[env + '_user_lists']) | flatten(1) if type=='bastion' else deploy_user_list }}"
+  become: yes
+
+- name: SSH-Users > Create folder .ssh
+  file:
+    path: /home/{{ item.user_name }}/.ssh
+    state: directory
+    owner: "{{ item.user_name }}"
+    group: "{{ item.user_name }}"
+    mode: 0700
+  loop: "{{ (deploy_user_list, all_user_lists, vars[env + '_user_lists']) | flatten(1) if type=='bastion' else deploy_user_list }}"
+  become: yes
+
+- name: SSH-Users > Configuring authorized_keys except {{ deploy_user }}
+  copy:
+    content: "{{ item.authorized_keys }}"
+    dest: /home/{{ item.user_name }}/.ssh/authorized_keys
+    owner: "{{ item.user_name }}"
+    group: "{{ item.user_name }}"
+    mode: 0600
+  loop: "{{ (all_user_lists, vars[env + '_user_lists']) | flatten(1) }}"
+  become_user: '{{ item.user_name }}'
+  become: yes
+  when: type=="bastion"
+
+- name: SSH-Users > Allow sudo without password
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ item.user_name }} ALL=(ALL) NOPASSWD:ALL"
+    validate: 'visudo -cf %s'
+  loop: "{{ (deploy_user_list, all_user_lists, vars[env + '_user_lists']) | flatten(1) if type=='bastion' else deploy_user_list }}"
+  become: yes
+
+
+#Add timedate to .bashrc
+- name: SSH-Users > Add timedate configuration to last line of .bashrc
+  lineinfile:
+    path: /home/{{ item.user_name }}/.bashrc
+    line: HISTTIMEFORMAT="%d/%m/%y %T "
+  loop: "{{ (ubuntu_user_list, deploy_user_list, all_user_lists, vars[env + '_user_lists']) | flatten(1) if type=='bastion' else (ubuntu_user_list, deploy_user_list) | flatten(1) }}"
+  become: yes

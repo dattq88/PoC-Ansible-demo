@@ -1,0 +1,33 @@
+env: dev
+full_env: staging
+domain: '{{env}}.vpb-platform.vn'
+
+# User ssh to server
+ansible_ssh_user: ubuntu
+
+# Roles/ruby-with-rvm
+bundler_version: 2.0.2
+rvm_rubies:
+  - 'ruby-2.7.1'
+# Roles/rails-with-rvm
+rails_version: 6.0.3.1
+# Roles/puma-with-rvm
+puma_version: 4.3.3
+
+# Roles/nginx
+
+# Roles/npm-ppa
+nodejs_setup_version: "12"
+
+# Roles/pm2-ppa
+pm2_version: 4.5.0
+cross_env_version: 7.0.2
+
+# Roles/yarn-ppa
+yarn_version: 1.22.4
+
+# Role/Mysql-client
+mysql_client_version: 5.7
+
+# Roles/bundle-install - Git version of repository: branch, tag,...
+version_repo: develop
